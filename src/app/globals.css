@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
+
+
+/* Afori-ish palette (sampled from site imagery) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: 242 250 241;        /* #F2FAF1 */
+  --card: 255 255 255;      /* #FFFFFF */
+  --muted: 237 245 238;     /* #EDF5EE */
+  --muted-2: 219 227 224;   /* ~#DBE3E0 */
+  --text: 16 24 16;         /* near-black green */
+  --subtext: 55 72 57;      /* muted text */
+  --border: 220 230 223;    /* soft border */
+
+  --primary: 59 118 69;     /* #3B7645 */
+  --primary-2: 87 142 96;   /* #578E60 */
+  --accent: 167 214 169;    /* #A7D6A9 */
+  --warn: 234 179 8;        /* yellow */
+  --danger: 220 38 38;      /* red */
+  --info: 37 99 235;        /* blue */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--text));
+  background: rgb(var(--bg));
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl bg-white shadow-sm border;
+    border-color: rgb(var(--border));
+  }
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border bg-white;
+    border-color: rgb(var(--border));
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold border transition;
+    border-color: rgb(var(--border));
+  }
+  .btn-primary {
+    @apply text-white border-transparent;
+    background: rgb(var(--primary));
+  }
+  .btn-primary:hover {
+    background: rgb(var(--primary-2));
+  }
+  .btn-ghost:hover {
+    background: rgb(var(--muted));
+  }
+  .input {
+    @apply w-full rounded-xl border bg-white px-3 py-2 text-sm outline-none transition;
+    border-color: rgb(var(--border));
+  }
+  .input:focus {
+    box-shadow: 0 0 0 4px rgba(59,118,69,0.15);
+    border-color: rgba(59,118,69,0.5);
+  }
+  .soft {
+    background: rgb(var(--muted));
+  }
 }
