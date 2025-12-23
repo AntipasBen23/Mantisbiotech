@@ -103,10 +103,130 @@ export default function ResultsDisplay({ data }: ResultsDisplayProps) {
 
       {/* Export Buttons */}
       <div className="flex gap-4">
-        <button className="flex-1 bg-[#1e3a8a] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#1e3a8a]/90 transition-colors">
+        <button 
+          onClick={() => {
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${data.file_metadata.filename}-analysis.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+          }}
+          className="flex-1 bg-[#1e3a8a] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#1e3a8a]/90 transition-colors"
+        >
           Export as JSON
         </button>
-        <button className="flex-1 bg-white text-[#1e3a8a] py-3 px-6 rounded-lg font-medium border-2 border-[#1e3a8a] hover:bg-[#1e3a8a]/5 transition-colors">
+        <button 
+          onClick={() => {
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+            
+            printWindow.document.write(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>CAD Analysis Report - ${data.file_metadata.filename}</title>
+                <style>
+                  body { font-family: Arial, sans-serif; padding: 40px; color: #1f2937; }
+                  h1 { color: #1e3a8a; margin-bottom: 10px; }
+                  h2 { color: #1e3a8a; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #1e3a8a; padding-bottom: 5px; }
+                  .metadata-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
+                  .metadata-item { padding: 10px; background: #f9fafb; border-radius: 5px; }
+                  .metadata-label { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
+                  .metadata-value { font-weight: 600; }
+                  .geometry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; }
+                  .geometry-box { text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; }
+                  .geometry-value { font-size: 24px; font-weight: bold; color: #1e3a8a; }
+                  .part-item { padding: 15px; margin: 10px 0; background: #f9fafb; border-radius: 8px; display: flex; justify-content: space-between; }
+                  .material-section { margin: 15px 0; }
+                  .material-name { font-weight: 600; margin-bottom: 10px; }
+                  .property-tag { display: inline-block; padding: 5px 12px; margin: 5px 5px 5px 0; background: #d1fae5; color: #10b981; border-radius: 15px; font-size: 14px; }
+                  @media print { body { padding: 20px; } }
+                </style>
+              </head>
+              <body>
+                <h1>CAD Analysis Report</h1>
+                <p style="color: #6b7280; margin-bottom: 30px;">Generated on ${new Date().toLocaleDateString()}</p>
+                
+                <h2>File Metadata</h2>
+                <div class="metadata-grid">
+                  <div class="metadata-item">
+                    <div class="metadata-label">Filename</div>
+                    <div class="metadata-value">${data.file_metadata.filename}</div>
+                  </div>
+                  <div class="metadata-item">
+                    <div class="metadata-label">Format</div>
+                    <div class="metadata-value">${data.file_metadata.format}</div>
+                  </div>
+                  <div class="metadata-item">
+                    <div class="metadata-label">Created</div>
+                    <div class="metadata-value">${data.file_metadata.created}</div>
+                  </div>
+                  <div class="metadata-item">
+                    <div class="metadata-label">Author</div>
+                    <div class="metadata-value">${data.file_metadata.author}</div>
+                  </div>
+                  <div class="metadata-item">
+                    <div class="metadata-label">Software</div>
+                    <div class="metadata-value">${data.file_metadata.software}</div>
+                  </div>
+                  <div class="metadata-item">
+                    <div class="metadata-label">File Size</div>
+                    <div class="metadata-value">${data.file_metadata.file_size}</div>
+                  </div>
+                </div>
+
+                <h2>Geometry Analysis</h2>
+                <div class="geometry-grid">
+                  <div class="geometry-box">
+                    <div class="metadata-label">Volume</div>
+                    <div class="geometry-value">${data.geometry.volume}</div>
+                  </div>
+                  <div class="geometry-box">
+                    <div class="metadata-label">Surface Area</div>
+                    <div class="geometry-value">${data.geometry.surface_area}</div>
+                  </div>
+                  <div class="geometry-box">
+                    <div class="metadata-label">Bounding Box</div>
+                    <div style="font-size: 14px; font-weight: 600; margin-top: 5px;">
+                      ${data.geometry.bounding_box.x} × ${data.geometry.bounding_box.y} × ${data.geometry.bounding_box.z}
+                    </div>
+                  </div>
+                </div>
+
+                <h2>Part Hierarchy</h2>
+                ${data.parts.map(part => `
+                  <div class="part-item">
+                    <div>
+                      <div style="font-weight: 600;">${part.name}</div>
+                      <div style="color: #6b7280; font-size: 14px;">${part.material}</div>
+                    </div>
+                    <div style="font-weight: 600;">× ${part.count}</div>
+                  </div>
+                `).join('')}
+
+                <h2>Materials</h2>
+                ${data.materials.map(material => `
+                  <div class="material-section">
+                    <div class="material-name">${material.name}</div>
+                    <div>
+                      ${material.properties.map(prop => `<span class="property-tag">${prop}</span>`).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </body>
+              </html>
+            `);
+            
+            printWindow.document.close();
+            setTimeout(() => {
+              printWindow.print();
+            }, 250);
+          }}
+          className="flex-1 bg-white text-[#1e3a8a] py-3 px-6 rounded-lg font-medium border-2 border-[#1e3a8a] hover:bg-[#1e3a8a]/5 transition-colors"
+        >
           Export as PDF
         </button>
       </div>
