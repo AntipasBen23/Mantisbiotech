@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Risk Radar — Afori-style Demo",
-  description: "Frontend-only MVP: Inbox → Extraction → Timeline → Signals",
+  title: "CAD Import & Metadata Extractor — Mantis Biotech",
+  description: "Automatically extract metadata and geometry data from STEP, STL, and IGES CAD files",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
